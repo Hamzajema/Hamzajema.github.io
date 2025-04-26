@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Hamza Jemaa - Portfolio</title>
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+        <style>
+            :root {
+                --primary-color: #2c3e50;
+                --secondary-color: #3498db;
+                --light-color: #ecf0f1;
+                --dark-color: #2c3e50;
+                --accent-color: #e74c3c;
+                --gradient-start: #2c3e50;
+                --gradient-end: #1a252f;
+            }
+
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            }
+
+            body {
+                background-color: #f5f5f5;
+                color: #333;
+                line-height: 1.6;
+            }
+
+            a {
+                text-decoration: none;
+                color: var(--secondary-color);
+            }
+
+            a:hover {
+                color: var(--accent-color);
+            }
+
+            .container {
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 0 20px;
+            }
+
+            /* Navigation */
+            nav {
+                background-color: var(--primary-color);
+                position: fixed;
+                width: 100%;
+                top: 0;
+                z-index: 1000;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            }
+
+            .nav-container {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 15px 20px;
+            }
+
+            .logo {
+                color: white;
+                font-size: 1.5rem;
+                font-weight: bold;
+            }
+
+            .nav-links {
+                display: flex;
+                gap: 20px;
+            }
+
+            .nav-links a {
+                color: white;
+                transition: color 0.3s;
+            }
+
+            .nav-links a:hover {
+                color: var(--secondary-color);
+            }
+
+            .mobile-menu {
+                display: none;
+                color: white;
+                font-size: 1.5rem;
+                cursor: pointer;
+            }
+
+            /* Header */
+            header {
+                background: linear-gradient(to right, var(--gradient-start), var(--gradient-end));
+                color: white;
+                padding: 150px 0 70px;
+                text-align: center;
+            }
+
+            .profile-container {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                margin-bottom: 20px;
+            }
+
+            .profile-pic {
+                width: 180px;
+                height: 180px;
+                border-radius: 50%;
+                background-color: var(--light-color);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                margin-bottom: 25px;
+                font-size: 5rem;
+                color: var(--primary-color);
+                border: 5px solid white;
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+                overflow: hidden;
+            }
+
+            .name {
+                font-size: 3rem;
+                margin-bottom: 10px;
+            }
+
+            .title {
+                font-size: 1.5rem;
+                color: var(--light-color);
+                margin-bottom: 20px;
+            }
+
+            .contact-info {
+                display: flex;
+                justify-content: center;
+                flex-wrap: wrap;
+                gap: 25px;
+                margin-top: 30px;
+            }
+
+            .contact-item {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                transition: transform 0.3s;
+            }
+
+            .contact-item:hover {
+                transform: translateY(-3px);
+            }
+
+            /* Main content */
+            .main-content {
+                padding: 60px 0;
+            }
+
+            .section {
+                background-color: white;
+                border-radius: 12px;
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+                padding: 35px;
+                margin-bottom: 40px;
+                transition: transform 0.3s ease;
+            }
+
+            .section:hover {
+                transform: translateY(-5px);
+            }
+
+            .section-title {
+                font-size: 2rem;
+                color: var(--primary-color);
+                margin-bottom: 25px;
+                padding-bottom: 15px;
+                border-bottom: 3px solid var(--secondary-color);
+                position: relative;
+            }
+
+            .section-title::after {
+                content: '';
+                position: absolute;
+                bottom: -3px;
+                left: 0;
+                width: 60px;
+                height: 3px;
+                background-color: var(--accent-color);
+            }
+
+            /* About Me */
+            .about-text {
+                text-align: justify;
+                margin-bottom: 20px;
+                font-size: 1.1rem;
+                line-height: 1.8;
+            }
+
+            /* Summary */
+            .summary-text {
+                font-size: 1.1rem;
+                line-height: 1.8;
+                margin-bottom: 20px;
+            }
+
+            /* Skills */
+            .skills-container {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+                gap: 30px;
+            }
+
+            .skill-category {
+                margin-bottom: 25px;
+            }
+
+            .skill-category h3 {
+                font-size: 1.3rem;
+                color: var(--secondary-color);
+                margin-bottom: 15px;
+                padding-bottom: 5px;
+                border-bottom: 1px dashed #ccc;
+            }
+
+            .skills-list {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 12px;
+            }
+
+            .skill-item {
+                background-color: var(--light-color);
+                padding: 8px 15px;
+                border-radius: 20px;
+                font-size: 0.95rem;
+                transition: all 0.3s;
+            }
+
+            .skill-item:hover {
+                background-color: var(--secondary-color);
+                color: white;
+                transform: translateY(-3px);
+            }
+
+            /* Experience */
+            .experience-item {
+                margin-bottom: 35px;
+                padding-bottom: 25px;
+                border-bottom: 1px solid #eee;
+            }
+
+            .experience-item:last-child {
+                margin-bottom: 0;
+                padding-bottom: 0;
+                border-bottom: none;
+            }
+
+            .experience-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                margin-bottom: 10px;
+                flex-wrap: wrap;
+            }
+
+            .experience-title {
+                font-size: 1.3rem;
+                font-weight: bold;
+                color: var(--dark-color);
+                margin-bottom: 5px;
+            }
+
+            .experience-place {
+                font-weight: bold;
+                color: var(--secondary-color);
+                margin-bottom: 5px;
+            }
+
+            .experience-date {
+                color: #777;
+                font-style: italic;
+                margin-bottom: 8px;
+            }
+
+            .experience-description {
+                margin-top: 15px;
+            }
+
+            .experience-tech {
+                font-size: 0.9rem;
+                color: #666;
+                margin-top: 10px;
+                margin-bottom: 10px;
+            }
+
+            .experience-details {
+                margin-top: 10px;
+                padding-left: 20px;
+            }
+
+            .experience-details li {
+                margin-bottom: 8px;
+                position: relative;
+                padding-left: 15px;
+            }
+
+            .experience-details li::before {
+                content: "•";
+                position: absolute;
+                left: 0;
+                color: var(--secondary-color);
+            }
+
+            /* Education */
+            .education-item {
+                margin-bottom: 25px;
+                padding-bottom: 20px;
+                border-bottom: 1px solid #eee;
+            }
+
+            .education-item:last-child {
+                margin-bottom: 0;
+                padding-bottom: 0;
+                border-bottom: none;
+            }
+
+            .education-degree {
+                font-size: 1.3rem;
+                font-weight: bold;
+                color: var(--dark-color);
+                margin-bottom: 5px;
+            }
+
+            .education-institution {
+                font-weight: bold;
+                color: var(--secondary-color);
+                margin-bottom: 5px;
+            }
+
+            .education-date {
+                color: #777;
+                font-style: italic;
+            }
+
+            .education-status {
+                display: inline-block;
+                background-color: var(--accent-color);
+                color: white;
+                padding: 2px 8px;
+                border-radius: 10px;
+                font-size: 0.8rem;
+                margin-left: 10px;
+            }
+
+            /* Training */
+            .training-item {
+                margin-bottom: 20px;
+                padding-bottom: 15px;
+                border-bottom: 1px solid #eee;
+            }
+
+            .training-item:last-child {
+                margin-bottom: 0;
+                padding-bottom: 0;
+                border-bottom: none;
+            }
+
+            .training-date {
+                font-weight: bold;
+                color: var(--secondary-color);
+                margin-right: 5px;
+            }
+
+            /* Languages & Software */
+            .tools-container {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+                gap: 25px;
+            }
+
+            .tools-category h3 {
+                font-size: 1.3rem;
+                color: var(--secondary-color);
+                margin-bottom: 15px;
+                padding-bottom: 5px;
+                border-bottom: 1px dashed #ccc;
+            }
+
+            .tools-list {
+                list-style-type: none;
+            }
+
+            .tools-list li {
+                margin-bottom: 8px;
+                position: relative;
+                padding-left: 20px;
+            }
+
+            .tools-list li::before {
+                content: "→";
+                position: absolute;
+                left: 0;
+                color: var(--secondary-color);
+            }
+
+            /* Talents */
+            .talents-list {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 15px;
+            }
+
+            .talent-item {
+                background-color: var(--light-color);
+                padding: 12px 20px;
+                border-radius: 8px;
+                text-align: center;
+                transition: all 0.3s;
+                flex-grow: 1;
+                min-width: 120px;
+            }
+
+            .talent-item:hover {
+                background-color: var(--secondary-color);
+                color: white;
+                transform: translateY(-3px);
+            }
+
+            /* Footer */
+            footer {
+                background: linear-gradient(to right, var(--gradient-start), var(--gradient-end));
+                color: white;
+                padding: 40px 0 30px;
+                text-align: center;
+            }
+
+            .social-links {
+                margin-bottom: 25px;
+                display: flex;
+                justify-content: center;
+                gap: 20px;
+            }
+
+            .social-link {
+                color: white;
+                font-size: 1.8rem;
+                transition: all 0.3s;
+                width: 50px;
+                height: 50px;
+                background-color: rgba(255, 255, 255, 0.1);
+                border-radius: 50%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+
+            .social-link:hover {
+                transform: translateY(-5px);
+                background-color: var(--secondary-color);
+                color: white;
+            }
+
+            .footer-text {
+                font-size: 1rem;
+                margin-top: 20px;
+            }
+
+            /* Responsive design */
+            @media (max-width: 992px) {
+
+                .skills-container,
+                .tools-container {
+                    grid-template-columns: 1fr 1fr;
+                }
+            }
+
+            @media (max-width: 768px) {
+
+                .skills-container,
+                .tools-container {
+                    grid-template-columns: 1fr;
+                }
+
+                .mobile-menu {
+                    display: block;
+                }
+
+                .nav-links {
+                    display: none;
+                    position: absolute;
+                    top: 60px;
+                    left: 0;
+                    right: 0;
+                    background: var(--primary-color);
+                    flex-direction: column;
+                    padding: 20px;
+                    align-items: center;
+                }
+
+                .nav-links.active {
+                    display: flex;
+                }
+
+                .experience-header {
+                    flex-direction: column;
+                }
+
+                .name {
+                    font-size: 2.2rem;
+                }
+
+                .title {
+                    font-size: 1.2rem;
+                }
+
+                .section {
+                    padding: 25px;
+                }
+            }
+
+            @media (max-width: 576px) {
+                .contact-info {
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 15px;
+                }
+
+                .profile-pic {
+                    width: 150px;
+                    height: 150px;
+                }
+
+                .section-title {
+                    font-size: 1.7rem;
+                }
+
+                .contact-item {
+                    font-size: 0.9rem;
+                }
+            }
+        </style>
+    </head>
+
+    <body>
+        <nav>
+            <div class="container nav-container">
+                <div class="logo">Hamza Jemaa</div>
+                <div class="mobile-menu">
+                   <i class="fas fa-bars"></i> 
+                </div>
+                <div class="nav-links">
+                    <a href="#about">About</a>
+                    <a href="#summary">Summary</a>
+                    <a href="#skills">Skills</a>
+                    <a href="#experience">Experience</a>
+                    <a href="#education">Education</a>
+                    <a href="#training">Training</a>
+                    <a href="#contact">Contact</a>
+                </div>
+            </div>
+        </nav>
+
+        <header>
+            <div class="container">
+                <div class="profile-container">
+                    <!-- <div class="profile-pic"> -->
+                                        <img src="Photo hamza jemaa.jpg" alt="" width="150" height="150" style="border-radius: 50%;">
+
+                    <!-- </div> -->
+                    <h1 class="name">Hamza Jemaa</h1>
+                    <p class="title">Engineering Student | Web & BI Developer | DevOps Enthusiast</p>
+
+                    <div class="contact-info" id="contact">
+                        <div class="contact-item">
+                            <i class="fas fa-phone"></i>
+                            <span>+216 51 075 734</span>
+                        </div>
+                        <div class="contact-item">
+                            <i class="fas fa-envelope"></i>
+                            <span>jemahamza81@gmail.com</span>
+                        </div>
+                        <div class="contact-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>Tunis, Tunisia</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <div class="container">
+                <section class="section" id="about">
+                    <h2 class="section-title">About Me</h2>
+                    <p class="about-text">
+                        I am an engineering student specializing in Computer Science and Multimedia with strong
+                        foundations in web development, Business Intelligence (BI), DevOps, and UX/UI design. I am
+                        actively involved in both academic and professional projects, demonstrating my ability to
+                        analyze problems and provide logical solutions.
+                    </p>
+                    <p class="about-text">
+                        As a team player with a commitment to excellence, I strive to build secure, scalable, and
+                        user-centric solutions. I enjoy interacting with cross-functional teams to deliver innovative
+                        and efficient digital products.
+                    </p>
+                </section>
+
+                <section class="section" id="summary">
+                    <h2 class="section-title">Summary of Qualifications</h2>
+                    <p class="summary-text">
+                        Engineering student specializing in Computer Science and Multimedia with strong foundations in
+                        web development, Business Intelligence (BI), DevOps, and UX/UI design. Led and collaborated on
+                        multiple projects, assuming responsibility for building secure, scalable, and user-centric
+                        solutions. Actively interacts with cross-functional teams to deliver innovative and efficient
+                        digital products.
+                    </p>
+                </section>
+
+                <section class="section" id="skills">
+                    <h2 class="section-title">Technical Skills</h2>
+                    <div class="skills-container">
+                        <div class="skill-category">
+                            <h3>Programming Languages</h3>
+                            <div class="skills-list">
+                                <span class="skill-item">HTML5</span>
+                                <span class="skill-item">CSS3</span>
+                                <span class="skill-item">JavaScript</span>
+                                <span class="skill-item">TypeScript</span>
+                                <span class="skill-item">SQL</span>
+                                <span class="skill-item">NoSQL</span>
+                                <span class="skill-item">Java/JEE</span>
+                                <span class="skill-item">C</span>
+                                <span class="skill-item">VB.net</span>
+                                <span class="skill-item">PHP</span>
+                                <span class="skill-item">Python</span>
+                            </div>
+                        </div>
+                        <div class="skill-category">
+                            <h3>Frameworks & Libraries</h3>
+                            <div class="skills-list">
+                                <span class="skill-item">Angular</span>
+                                <span class="skill-item">Vue JS 3</span>
+                                <span class="skill-item">Flask</span>
+                                <span class="skill-item">Express.js</span>
+                                <span class="skill-item">Node.js</span>
+                                <span class="skill-item">Bootstrap</span>
+                            </div>
+                        </div>
+                        <div class="skill-category">
+                            <h3>BI Tools & Databases</h3>
+                            <div class="skills-list">
+                                <span class="skill-item">Power BI</span>
+                                <span class="skill-item">IBM SPSS</span>
+                                <span class="skill-item">SSMS</span>
+                                <span class="skill-item">SSIS</span>
+                                <span class="skill-item">SSAS</span>
+                                <span class="skill-item">Oracle</span>
+                                <span class="skill-item">MongoDB</span>
+                            </div>
+                        </div>
+                        <div class="skill-category">
+                            <h3>Big Data, Cloud & Security</h3>
+                            <div class="skills-list">
+                                <span class="skill-item">Apache Kafka</span>
+                                <span class="skill-item">Keycloak</span>
+                                <span class="skill-item">Docker</span>
+                            </div>
+                        </div>
+                        <div class="skill-category">
+                            <h3>Dev Tools & Platforms</h3>
+                            <div class="skills-list">
+                                <span class="skill-item">VS Code</span>
+                                <span class="skill-item">Git</span>
+                                <span class="skill-item">Unix/Linux Systems</span>
+                            </div>
+                        </div>
+                        <div class="skill-category">
+                            <h3>Design & Prototyping</h3>
+                            <div class="skills-list">
+                                <span class="skill-item">Figma</span>
+                                <span class="skill-item">UX/UI Design</span>
+                                <span class="skill-item">Prototyping</span>
+                                <span class="skill-item">Balsamic</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="section" id="experience">
+                    <h2 class="section-title">Professional Experience</h2>
+
+                    <div class="experience-item">
+                        <div class="experience-header">
+                            <div>
+                                <div class="experience-title">BI Developer</div>
+                                <div class="experience-place">Upgradetek Engineering</div>
+                            </div>
+                            <div class="experience-date">January 2024 - Present</div>
+                        </div>
+                        <div class="experience-tech">
+                            <strong>Technologies:</strong> Node.js, Express, Python, Flask, Angular, Apache Kafka,
+                            Keycloak, Docker
+                        </div>
+                        <div class="experience-description">
+                            <ul class="experience-details">
+                                <li>Led the development of an end-to-end BI application for banking product management.
+                                </li>
+                                <li>Delegated development tasks among the team to streamline project delivery.</li>
+                                <li>Assumed full responsibility for Docker containerization and secure Keycloak
+                                    authentication.</li>
+                                <li>Assists in integrating Big Data tools (Kafka) to enhance financial forecasting and
+                                    analytics.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="experience-item">
+                        <div class="experience-header">
+                            <div>
+                                <div class="experience-title">BI Dashboard Developer</div>
+                                <div class="experience-place">Adventure Work</div>
+                            </div>
+                            <div class="experience-date">February 2023 - April 2023</div>
+                        </div>
+                        <div class="experience-tech">
+                            <strong>Technologies:</strong> Microsoft SQL Server, SSIS, SSAS, Power BI
+                        </div>
+                        <div class="experience-description">
+                            <ul class="experience-details">
+                                <li>Developed strategic HR dashboards to improve resource management and
+                                    decision-making.</li>
+                                <li>Assisted senior data engineers in preparing data models using SSAS and visualizing
+                                    KPIs in Power BI.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="experience-item">
+                        <div class="experience-header">
+                            <div>
+                                <div class="experience-title">Web Development Intern</div>
+                                <div class="experience-place">Tunisair</div>
+                            </div>
+                            <div class="experience-date">June 2023 - August 2023</div>
+                        </div>
+                        <div class="experience-tech">
+                            <strong>Technologies:</strong> Flask, JavaScript, HTML, CSS, Bootstrap
+                        </div>
+                        <div class="experience-description">
+                            <ul class="experience-details">
+                                <li>Led the creation of a web application that automated the transformation of Excel
+                                    bank statements into AFB120 format.</li>
+                                <li>Interacted with finance teams to align technical outputs with operational needs,
+                                    reducing manual errors.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="experience-item">
+                        <div class="experience-header">
+                            <div>
+                                <div class="experience-title">Web Application Developer (Training Project)</div>
+                                <div class="experience-place">CrocoCoder</div>
+                            </div>
+                            <div class="experience-date">March 2023 - May 2023</div>
+                        </div>
+                        <div class="experience-tech">
+                            <strong>Technologies:</strong> Angular, Node.js, Express.js, TypeScript, Bootstrap
+                        </div>
+                        <div class="experience-description">
+                            <ul class="experience-details">
+                                <li>Designed and built a real-time match tracking application displayed on public-facing
+                                    platforms.</li>
+                                <li>Assumed ownership of front-end development, ensuring mobile-first design and high
+                                    usability.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="section" id="education">
+                    <h2 class="section-title">Education</h2>
+
+                    <div class="education-item">
+                        <div class="education-degree">Engineering Degree in Computer Science and Multimedia <span
+                                class="education-status">In Progress</span></div>
+                        <div class="education-institution">ISAMM, University of Manouba</div>
+                        <div class="education-date">2024 - 2027</div>
+                    </div>
+
+                    <div class="education-item">
+                        <div class="education-degree">Bachelor's in Business Computing (BI)</div>
+                        <div class="education-institution">FSEGT Manar University</div>
+                        <div class="education-date">2021 - 2024</div>
+                    </div>
+
+                    <div class="education-item">
+                        <div class="education-degree">Baccalaureate in Mathematics</div>
+                        <div class="education-institution">Lycée Secondaire Cité Ibn Khaldoun</div>
+                        <div class="education-date">2020 - 2021</div>
+                    </div>
+                </section>
+
+                <section class="section" id="training">
+                    <h2 class="section-title">Additional Training</h2>
+
+                    <div class="training-item">
+                        <span class="training-date">2023:</span>
+                        <span class="training-description">MEAN Stack Training (Node.js, Angular, Express.js, Bootstrap)
+                            — Organized by CrocoCoder</span>
+                    </div>
+
+                    <div class="training-item">
+                        <span class="training-date">2023:</span>
+                        <span class="training-description">Digital Community Currencies Training — Organized by Berlin
+                            School of Economics and Law</span>
+                    </div>
+
+                    <div class="training-item">
+                        <span class="training-date">2022-2023:</span>
+                        <span class="training-description">Digital Marketing Training — Organized by Université
+                            Centrale</span>
+                    </div>
+
+                    <div class="training-item">
+                        <span class="training-date">2021-2022:</span>
+                        <span class="training-description">Python, Big Data, and Data Science Training</span>
+                    </div>
+                </section>
+
+                <div class="section" id="tools-languages">
+                    <h2 class="section-title">Languages & Talents</h2>
+                    <div class="tools-container">
+                        <div class="tools-category">
+                            <h3>Languages</h3>
+                            <ul class="tools-list">
+                                <li>French</li>
+                                <li>English</li>
+                            </ul>
+                        </div>
+                        <div class="tools-category">
+                            <h3>Talents</h3>
+                            <div class="talents-list">
+                                <div class="talent-item">UI/UX Design</div>
+                                <div class="talent-item">Problem Solving</div>
+                                <div class="talent-item">Team Leadership</div>
+                                <div class="talent-item">Computing</div>
+                                <div class="talent-item">Puzzle Solving</div>
+                                <div class="talent-item">Reading</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <div class="container">
+                <div class="social-links">
+                    <a href="https://github.com/Hamzajema" class="social-link" target="_blank">
+                        <i class="fab fa-github"></i>
+                    </a>
+                    <a href="https://linkedin.com/in/hamza-jema" class="social-link" target="_blank">
+                        <i class="fab fa-linkedin"></i>
+                    </a>
+                    <a href="mailto:jemahamza81@gmail.com" class="social-link">
+                        <i class="fas fa-envelope"></i>
+                    </a>
+                </div>
+                <p class="footer-text">&copy; 2025 Hamza Jemaa. All rights reserved.</p>
+            </div>
+        </footer>
+
+        <script>
+            // Mobile menu toggle
+            document.querySelector('.mobile-menu').addEventListener('click', function () {
+                document.querySelector('.nav-links').classList.toggle('active');
+            });
+
+            // Smooth scrolling for anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+
+                    // Close mobile menu if open
+                    document.querySelector('.nav-links').classList.remove('active');
+
+                    const targetId = this.getAttribute('href');
+                    const targetElement = document.querySelector(targetId);
+
+                    if (targetElement) {
+                        window.scrollTo({
+                            top: targetElement.offsetTop - 70,
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+        </script>
+    </body>
+
+</html>
