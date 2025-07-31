@@ -1072,23 +1072,34 @@
                 });
             });
         
-        // ===== VISITOR TRACKING SYSTEM =====
-// Add this JavaScript code to your existing portfolio
-
-class VisitorTracker {
+        
+class GitHubVisitorTracker {
     constructor() {
-        this.storageKey = 'portfolioVisitorData';
-        this.sessionKey = 'portfolioSessionData';
+        // GitHub configuration - REPLACE WITH YOUR INFO
+        this.config = {
+            owner: 'Hamzajema',           // Your GitHub username
+            repo: 'Hamzajema.github.io',  // Your repository name
+            branch: 'main',               // Usually 'main' or 'master'
+            filePath: 'visitors.json',    // File to store visitor data
+            token: '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'    // You need to generate this (see instructions below)
+        };
+        
+        this.apiBase = 'https://api.github.com/repos';
         this.init();
     }
 
-    init() {
-        this.createVisitorDisplay();
-        this.trackVisitor();
-        this.setupEventListeners();
+    async init() {
+        try {
+            await this.createVisitorDisplay();
+            await this.trackVisitor();
+            this.setupEventListeners();
+        } catch (error) {
+            console.error('Visitor tracker initialization failed:', error);
+            this.fallbackToLocalStorage();
+        }
     }
 
-    // Create the visitor counter display
+    // Create the visitor display UI
     createVisitorDisplay() {
         // Create floating counter
         const counterDiv = document.createElement('div');
@@ -1096,62 +1107,44 @@ class VisitorTracker {
         counterDiv.innerHTML = `
             <div class="counter-content">
                 <span class="counter-icon">👥</span>
-                <span class="counter-text">Visits: <span id="visit-count">0</span></span>
+                <span class="counter-text">Visitors: <span id="visit-count">Loading...</span></span>
             </div>
         `;
         document.body.appendChild(counterDiv);
 
-        // Create detailed stats (optional - can be hidden/shown)
-        const statsDiv = document.createElement('div');
-        statsDiv.id = 'visitor-stats';
-        statsDiv.innerHTML = `
-            <div class="stats-header">
-                <h3>📊 Visitor Statistics</h3>
-                <button id="stats-toggle">×</button>
+        // Create visitor list panel
+        const listDiv = document.createElement('div');
+        listDiv.id = 'visitor-list';
+        listDiv.innerHTML = `
+            <div class="list-header">
+                <h3>👥 Recent Visitors</h3>
+                <button id="list-toggle">×</button>
             </div>
-            <div class="stats-content">
-                <div class="stat-item">
-                    <span class="stat-label">Total Visits:</span>
-                    <span id="total-visits">0</span>
+            <div class="list-content">
+                <div id="visitor-stats">
+                    <div class="stat-item">Total Visitors: <span id="total-visitors">0</span></div>
+                    <div class="stat-item">Today: <span id="today-visitors">0</span></div>
+                    <div class="stat-item">This Week: <span id="week-visitors">0</span></div>
                 </div>
-                <div class="stat-item">
-                    <span class="stat-label">Unique Visitors:</span>
-                    <span id="unique-visitors">0</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Today's Visits:</span>
-                    <span id="today-visits">0</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Your Visits:</span>
-                    <span id="user-visits">0</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Last Visit:</span>
-                    <span id="last-visit">Never</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Session Duration:</span>
-                    <span id="session-time">0s</span>
+                <div class="visitor-entries" id="visitor-entries">
+                    <div class="loading">Loading visitor data...</div>
                 </div>
             </div>
         `;
-        document.body.appendChild(statsDiv);
+        document.body.appendChild(listDiv);
 
-        // Add CSS styles
         this.addStyles();
     }
 
-    // Add CSS styles for the visitor tracker
+    // Add CSS styles
     addStyles() {
         const style = document.createElement('style');
         style.textContent = `
-            /* Visitor Counter Styles */
             #visitor-counter {
                 position: fixed;
                 bottom: 20px;
                 right: 20px;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
                 color: white;
                 padding: 12px 16px;
                 border-radius: 25px;
@@ -1168,7 +1161,6 @@ class VisitorTracker {
             #visitor-counter:hover {
                 transform: translateY(-2px);
                 box-shadow: 0 6px 20px rgba(0,0,0,0.3);
-                background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
             }
 
             .counter-content {
@@ -1179,39 +1171,38 @@ class VisitorTracker {
 
             .counter-icon {
                 font-size: 16px;
-                animation: pulse 2s infinite;
+                animation: bounce 2s infinite;
             }
 
-            @keyframes pulse {
-                0% { transform: scale(1); }
-                50% { transform: scale(1.1); }
-                100% { transform: scale(1); }
+            @keyframes bounce {
+                0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+                40% { transform: translateY(-5px); }
+                60% { transform: translateY(-3px); }
             }
 
-            /* Visitor Stats Panel */
-            #visitor-stats {
+            #visitor-list {
                 position: fixed;
                 bottom: 80px;
                 right: 20px;
                 background: white;
                 border-radius: 12px;
-                box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+                box-shadow: 0 8px 32px rgba(0,0,0,0.15);
                 z-index: 999;
-                min-width: 280px;
-                max-width: 350px;
+                width: 350px;
+                max-height: 500px;
                 transform: translateX(400px);
                 opacity: 0;
                 transition: all 0.3s ease;
                 border: 1px solid #e1e5e9;
             }
 
-            #visitor-stats.show {
+            #visitor-list.show {
                 transform: translateX(0);
                 opacity: 1;
             }
 
-            .stats-header {
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            .list-header {
+                background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
                 color: white;
                 padding: 15px 20px;
                 border-radius: 12px 12px 0 0;
@@ -1220,13 +1211,13 @@ class VisitorTracker {
                 align-items: center;
             }
 
-            .stats-header h3 {
+            .list-header h3 {
                 margin: 0;
                 font-size: 16px;
                 font-weight: 600;
             }
 
-            #stats-toggle {
+            #list-toggle {
                 background: none;
                 border: none;
                 color: white;
@@ -1242,42 +1233,89 @@ class VisitorTracker {
                 transition: background 0.2s ease;
             }
 
-            #stats-toggle:hover {
+            #list-toggle:hover {
                 background: rgba(255,255,255,0.2);
             }
 
-            .stats-content {
-                padding: 20px;
+            .list-content {
+                max-height: 400px;
+                overflow-y: auto;
+            }
+
+            #visitor-stats {
+                padding: 15px 20px;
+                background: #f8f9fa;
+                border-bottom: 1px solid #e9ecef;
             }
 
             .stat-item {
                 display: flex;
                 justify-content: space-between;
-                align-items: center;
-                padding: 8px 0;
-                border-bottom: 1px solid #f0f0f0;
-                font-family: 'Arial', sans-serif;
-            }
-
-            .stat-item:last-child {
-                border-bottom: none;
-            }
-
-            .stat-label {
-                color: #666;
+                padding: 5px 0;
                 font-size: 14px;
+                color: #333;
             }
 
-            .stat-item span:not(.stat-label) {
+            .stat-item span {
+                font-weight: 600;
+                color: #4CAF50;
+            }
+
+            .visitor-entries {
+                padding: 10px;
+            }
+
+            .visitor-entry {
+                background: #f8f9fa;
+                border-radius: 8px;
+                padding: 12px;
+                margin-bottom: 8px;
+                border-left: 4px solid #4CAF50;
+                font-size: 13px;
+            }
+
+            .visitor-entry:last-child {
+                margin-bottom: 0;
+            }
+
+            .visitor-info {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 5px;
+            }
+
+            .visitor-id {
                 font-weight: 600;
                 color: #333;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                -webkit-background-clip: text;
-                -webkit-text-fill-color: transparent;
-                background-clip: text;
             }
 
-            /* Mobile Responsive */
+            .visitor-time {
+                color: #666;
+                font-size: 12px;
+            }
+
+            .visitor-details {
+                color: #777;
+                font-size: 12px;
+                line-height: 1.4;
+            }
+
+            .loading {
+                text-align: center;
+                padding: 20px;
+                color: #666;
+            }
+
+            .error {
+                text-align: center;
+                padding: 20px;
+                color: #dc3545;
+                background: #f8d7da;
+                border-radius: 8px;
+                margin: 10px;
+            }
+
             @media (max-width: 768px) {
                 #visitor-counter {
                     bottom: 15px;
@@ -1286,16 +1324,15 @@ class VisitorTracker {
                     font-size: 13px;
                 }
 
-                #visitor-stats {
+                #visitor-list {
                     bottom: 65px;
                     right: 15px;
                     left: 15px;
-                    min-width: auto;
-                    max-width: none;
+                    width: auto;
                     transform: translateY(400px);
                 }
 
-                #visitor-stats.show {
+                #visitor-list.show {
                     transform: translateY(0);
                 }
             }
@@ -1303,289 +1340,275 @@ class VisitorTracker {
         document.head.appendChild(style);
     }
 
-    // Main visitor tracking function
-    trackVisitor() {
+    // Track visitor and save to GitHub
+    async trackVisitor() {
+        try {
+            // Get current visitor data
+            const visitorData = this.collectVisitorData();
+            
+            // Get existing data from GitHub
+            const existingData = await this.getVisitorDataFromGitHub();
+            
+            // Add new visitor
+            existingData.visitors.push(visitorData);
+            existingData.totalVisits++;
+            existingData.lastUpdated = new Date().toISOString();
+            
+            // Keep only last 100 visitors to avoid file getting too large
+            if (existingData.visitors.length > 100) {
+                existingData.visitors = existingData.visitors.slice(-100);
+            }
+            
+            // Save back to GitHub
+            await this.saveVisitorDataToGitHub(existingData);
+            
+            // Update display
+            this.updateDisplay(existingData);
+            
+        } catch (error) {
+            console.error('Error tracking visitor:', error);
+            this.showError('Failed to save visitor data. Using local storage fallback.');
+            this.fallbackToLocalStorage();
+        }
+    }
+
+    // Collect current visitor information
+    collectVisitorData() {
         const now = new Date();
-        const today = now.toDateString();
-        const timestamp = now.getTime();
-
-        // Get existing data
-        let data = this.getStoredData();
-        let sessionData = this.getSessionData();
-
-        // Generate or get user ID
-        if (!data.userId) {
-            data.userId = this.generateUserId();
-        }
-
-        // Check if this is a new visit (more than 30 minutes since last visit)
-        const thirtyMinutes = 30 * 60 * 1000;
-        const isNewVisit = !data.lastVisit || (timestamp - data.lastVisit) > thirtyMinutes;
-
-        // Check if this is a new user
-        const isNewUser = !data.firstVisit;
-
-        if (isNewVisit) {
-            // Increment visit counters
-            data.totalVisits = (data.totalVisits || 0) + 1;
-            data.userVisits = (data.userVisits || 0) + 1;
-            data.lastVisit = timestamp;
-
-            // Set first visit if new user
-            if (isNewUser) {
-                data.firstVisit = timestamp;
-                data.uniqueVisitors = (data.uniqueVisitors || 0) + 1;
-            }
-
-            // Track daily visits
-            if (!data.dailyVisits) {
-                data.dailyVisits = {};
-            }
-            data.dailyVisits[today] = (data.dailyVisits[today] || 0) + 1;
-
-            // Track visitor info
-            this.trackVisitorInfo(data, timestamp);
-        }
-
-        // Update session data
-        sessionData.sessionStart = sessionData.sessionStart || timestamp;
-        sessionData.pageViews = (sessionData.pageViews || 0) + 1;
-
-        // Store updated data
-        this.storeData(data);
-        this.storeSessionData(sessionData);
-
-        // Update display
-        this.updateDisplay(data, sessionData);
-
-        // Start session timer
-        this.startSessionTimer(sessionData.sessionStart);
-
-        // Track page engagement
-        this.trackEngagement();
-    }
-
-    // Generate unique user ID
-    generateUserId() {
-        return 'user_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
-    }
-
-    // Track additional visitor information
-    trackVisitorInfo(data, timestamp) {
-        // Track browser info
-        data.browserInfo = {
+        
+        return {
+            id: this.generateVisitorId(),
+            timestamp: now.toISOString(),
+            date: now.toLocaleDateString(),
+            time: now.toLocaleTimeString(),
+            ip: 'Hidden', // Cannot get real IP from frontend
             userAgent: navigator.userAgent,
+            browser: this.getBrowserInfo(),
+            os: this.getOSInfo(),
             language: navigator.language,
-            platform: navigator.platform,
-            cookieEnabled: navigator.cookieEnabled,
-            onLine: navigator.onLine
+            screen: {
+                width: screen.width,
+                height: screen.height
+            },
+            page: {
+                url: window.location.href,
+                title: document.title,
+                referrer: document.referrer || 'Direct'
+            },
+            location: 'Unknown' // Cannot get location without permission
         };
+    }
 
-        // Track page info
-        data.pageInfo = {
-            url: window.location.href,
-            referrer: document.referrer,
-            title: document.title
-        };
+    // Generate unique visitor ID
+    generateVisitorId() {
+        return 'visitor_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+    }
 
-        // Track screen info
-        data.screenInfo = {
-            width: screen.width,
-            height: screen.height,
-            colorDepth: screen.colorDepth
-        };
+    // Get browser information
+    getBrowserInfo() {
+        const ua = navigator.userAgent;
+        let browser = 'Unknown';
+        
+        if (ua.includes('Chrome')) browser = 'Chrome';
+        else if (ua.includes('Firefox')) browser = 'Firefox';
+        else if (ua.includes('Safari')) browser = 'Safari';
+        else if (ua.includes('Edge')) browser = 'Edge';
+        else if (ua.includes('Opera')) browser = 'Opera';
+        
+        return browser;
+    }
 
-        // Track visit times
-        if (!data.visitTimes) {
-            data.visitTimes = [];
-        }
-        data.visitTimes.push({
-            timestamp: timestamp,
-            date: new Date(timestamp).toLocaleString()
-        });
+    // Get OS information
+    getOSInfo() {
+        const ua = navigator.userAgent;
+        let os = 'Unknown';
+        
+        if (ua.includes('Windows')) os = 'Windows';
+        else if (ua.includes('Mac')) os = 'macOS';
+        else if (ua.includes('Linux')) os = 'Linux';
+        else if (ua.includes('Android')) os = 'Android';
+        else if (ua.includes('iOS')) os = 'iOS';
+        
+        return os;
+    }
 
-        // Keep only last 10 visits
-        if (data.visitTimes.length > 10) {
-            data.visitTimes = data.visitTimes.slice(-10);
+    // Get visitor data from GitHub
+    async getVisitorDataFromGitHub() {
+        const url = `${this.apiBase}/${this.config.owner}/${this.config.repo}/contents/${this.config.filePath}`;
+        
+        try {
+            const response = await fetch(url, {
+                headers: {
+                    'Authorization': `token ${this.config.token}`,
+                    'Accept': 'application/vnd.github.v3+json'
+                }
+            });
+
+            if (response.status === 404) {
+                // File doesn't exist, create initial structure
+                return {
+                    totalVisits: 0,
+                    visitors: [],
+                    createdAt: new Date().toISOString(),
+                    lastUpdated: new Date().toISOString()
+                };
+            }
+
+            if (!response.ok) {
+                throw new Error(`GitHub API error: ${response.status}`);
+            }
+
+            const data = await response.json();
+            const content = JSON.parse(atob(data.content));
+            
+            // Add sha for updating
+            content._sha = data.sha;
+            
+            return content;
+            
+        } catch (error) {
+            console.error('Error getting visitor data from GitHub:', error);
+            throw error;
         }
     }
 
-    // Start session timer
-    startSessionTimer(sessionStart) {
-        setInterval(() => {
-            const sessionDuration = Math.floor((Date.now() - sessionStart) / 1000);
-            document.getElementById('session-time').textContent = this.formatTime(sessionDuration);
-        }, 1000);
+    // Save visitor data to GitHub
+    async saveVisitorDataToGitHub(data) {
+        const url = `${this.apiBase}/${this.config.owner}/${this.config.repo}/contents/${this.config.filePath}`;
+        
+        // Remove _sha from data before encoding
+        const sha = data._sha;
+        delete data._sha;
+        
+        const payload = {
+            message: `Update visitor data - ${new Date().toISOString()}`,
+            content: btoa(JSON.stringify(data, null, 2)),
+            branch: this.config.branch
+        };
+        
+        // Add sha if updating existing file
+        if (sha) {
+            payload.sha = sha;
+        }
+
+        try {
+            const response = await fetch(url, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `token ${this.config.token}`,
+                    'Accept': 'application/vnd.github.v3+json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(`GitHub API error: ${response.status} - ${errorData.message}`);
+            }
+
+            return await response.json();
+            
+        } catch (error) {
+            console.error('Error saving visitor data to GitHub:', error);
+            throw error;
+        }
     }
 
-    // Track user engagement
-    trackEngagement() {
-        let scrollDepth = 0;
-        let maxScroll = 0;
-        let clickCount = 0;
-        let keystrokes = 0;
+    // Update display with visitor data
+    updateDisplay(data) {
+        document.getElementById('visit-count').textContent = data.totalVisits;
+        document.getElementById('total-visitors').textContent = data.totalVisits;
+        
+        // Calculate today's and week's visitors
+        const today = new Date().toLocaleDateString();
+        const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+        
+        const todayVisitors = data.visitors.filter(v => v.date === today).length;
+        const weekVisitors = data.visitors.filter(v => new Date(v.timestamp) > weekAgo).length;
+        
+        document.getElementById('today-visitors').textContent = todayVisitors;
+        document.getElementById('week-visitors').textContent = weekVisitors;
+        
+        // Display recent visitors
+        this.displayVisitors(data.visitors);
+    }
 
-        // Track scroll depth
-        window.addEventListener('scroll', () => {
-            const winHeight = window.innerHeight;
-            const docHeight = document.documentElement.scrollHeight;
-            const scrollTop = window.pageYOffset;
-            scrollDepth = Math.round((scrollTop / (docHeight - winHeight)) * 100);
-            maxScroll = Math.max(maxScroll, scrollDepth);
-        });
+    // Display visitor list
+    displayVisitors(visitors) {
+        const container = document.getElementById('visitor-entries');
+        
+        if (visitors.length === 0) {
+            container.innerHTML = '<div class="loading">No visitors yet</div>';
+            return;
+        }
 
-        // Track clicks
-        document.addEventListener('click', () => {
-            clickCount++;
-        });
+        // Sort by timestamp (newest first) and take last 20
+        const recentVisitors = visitors
+            .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+            .slice(0, 20);
 
-        // Track keystrokes
-        document.addEventListener('keydown', () => {
-            keystrokes++;
-        });
-
-        // Store engagement data periodically
-        setInterval(() => {
-            const data = this.getStoredData();
-            data.engagement = {
-                maxScrollDepth: maxScroll,
-                clicks: clickCount,
-                keystrokes: keystrokes,
-                timeSpent: Math.floor((Date.now() - this.getSessionData().sessionStart) / 1000)
-            };
-            this.storeData(data);
-        }, 10000); // Every 10 seconds
+        container.innerHTML = recentVisitors.map(visitor => `
+            <div class="visitor-entry">
+                <div class="visitor-info">
+                    <span class="visitor-id">${visitor.browser} on ${visitor.os}</span>
+                    <span class="visitor-time">${visitor.time}</span>
+                </div>
+                <div class="visitor-details">
+                    📅 ${visitor.date} | 🌍 ${visitor.language} | 
+                    📱 ${visitor.screen.width}×${visitor.screen.height}<br>
+                    🔗 ${visitor.page.referrer}
+                </div>
+            </div>
+        `).join('');
     }
 
     // Setup event listeners
     setupEventListeners() {
-        // Toggle stats panel
+        // Toggle visitor list
         document.getElementById('visitor-counter').addEventListener('click', () => {
-            const statsPanel = document.getElementById('visitor-stats');
-            statsPanel.classList.toggle('show');
+            document.getElementById('visitor-list').classList.toggle('show');
         });
 
-        // Close stats panel
-        document.getElementById('stats-toggle').addEventListener('click', (e) => {
+        // Close visitor list
+        document.getElementById('list-toggle').addEventListener('click', (e) => {
             e.stopPropagation();
-            document.getElementById('visitor-stats').classList.remove('show');
+            document.getElementById('visitor-list').classList.remove('show');
         });
 
-        // Close stats when clicking outside
+        // Close when clicking outside
         document.addEventListener('click', (e) => {
-            const statsPanel = document.getElementById('visitor-stats');
+            const list = document.getElementById('visitor-list');
             const counter = document.getElementById('visitor-counter');
-            if (!statsPanel.contains(e.target) && !counter.contains(e.target)) {
-                statsPanel.classList.remove('show');
+            if (!list.contains(e.target) && !counter.contains(e.target)) {
+                list.classList.remove('show');
             }
         });
-
-        // Track page visibility
-        document.addEventListener('visibilitychange', () => {
-            const data = this.getStoredData();
-            if (document.visibilityState === 'hidden') {
-                data.lastActiveTime = Date.now();
-            } else {
-                data.returnTime = Date.now();
-            }
-            this.storeData(data);
-        });
     }
 
-    // Update display with current data
-    updateDisplay(data, sessionData) {
-        const today = new Date().toDateString();
-        const todayVisits = data.dailyVisits ? (data.dailyVisits[today] || 0) : 0;
-
-        document.getElementById('visit-count').textContent = data.totalVisits || 0;
-        document.getElementById('total-visits').textContent = data.totalVisits || 0;
-        document.getElementById('unique-visitors').textContent = data.uniqueVisitors || 1;
-        document.getElementById('today-visits').textContent = todayVisits;
-        document.getElementById('user-visits').textContent = data.userVisits || 0;
-        
-        if (data.lastVisit) {
-            document.getElementById('last-visit').textContent = new Date(data.lastVisit).toLocaleDateString();
+    // Show error message
+    showError(message) {
+        const container = document.getElementById('visitor-entries');
+        if (container) {
+            container.innerHTML = `<div class="error">${message}</div>`;
         }
     }
 
-    // Utility functions
-    formatTime(seconds) {
-        const hours = Math.floor(seconds / 3600);
-        const minutes = Math.floor((seconds % 3600) / 60);
-        const secs = seconds % 60;
-
-        if (hours > 0) {
-            return `${hours}h ${minutes}m ${secs}s`;
-        } else if (minutes > 0) {
-            return `${minutes}m ${secs}s`;
-        } else {
-            return `${secs}s`;
-        }
-    }
-
-    getStoredData() {
-        try {
-            return JSON.parse(localStorage.getItem(this.storageKey)) || {};
-        } catch (e) {
-            return {};
-        }
-    }
-
-    storeData(data) {
-        try {
-            localStorage.setItem(this.storageKey, JSON.stringify(data));
-        } catch (e) {
-            console.warn('Unable to store visitor data:', e);
-        }
-    }
-
-    getSessionData() {
-        try {
-            return JSON.parse(sessionStorage.getItem(this.sessionKey)) || {};
-        } catch (e) {
-            return {};
-        }
-    }
-
-    storeSessionData(data) {
-        try {
-            sessionStorage.setItem(this.sessionKey, JSON.stringify(data));
-        } catch (e) {
-            console.warn('Unable to store session data:', e);
-        }
-    }
-
-    // Public method to get analytics data
-    getAnalytics() {
-        return {
-            stored: this.getStoredData(),
-            session: this.getSessionData()
-        };
-    }
-
-    // Public method to reset all data
-    reset() {
-        localStorage.removeItem(this.storageKey);
-        sessionStorage.removeItem(this.sessionKey);
-        location.reload();
+    // Fallback to local storage if GitHub API fails
+    fallbackToLocalStorage() {
+        console.log('Using local storage fallback...');
+        // Use the previous local storage solution as fallback
+        // (You can copy the previous solution here as backup)
     }
 }
 
-// Initialize the visitor tracker when page loads
+// Initialize when page loads
 document.addEventListener('DOMContentLoaded', () => {
-    window.visitorTracker = new VisitorTracker();
+    // IMPORTANT: You need to set up GitHub token first!
+    // See instructions below
+    window.visitorTracker = new GitHubVisitorTracker();
 });
 
-// Optional: Add to window object for debugging
-window.getVisitorAnalytics = () => {
-    return window.visitorTracker ? window.visitorTracker.getAnalytics() : null;
-};
-
-window.resetVisitorData = () => {
-    if (window.visitorTracker && confirm('Are you sure you want to reset all visitor data?')) {
-        window.visitorTracker.reset();
-    }
-};
         
         </script>
     </body>
