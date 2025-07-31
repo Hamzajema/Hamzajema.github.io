@@ -1071,6 +1071,522 @@
                     }
                 });
             });
+        
+        // ===== VISITOR TRACKING SYSTEM =====
+// Add this JavaScript code to your existing portfolio
+
+class VisitorTracker {
+    constructor() {
+        this.storageKey = 'portfolioVisitorData';
+        this.sessionKey = 'portfolioSessionData';
+        this.init();
+    }
+
+    init() {
+        this.createVisitorDisplay();
+        this.trackVisitor();
+        this.setupEventListeners();
+    }
+
+    // Create the visitor counter display
+    createVisitorDisplay() {
+        // Create floating counter
+        const counterDiv = document.createElement('div');
+        counterDiv.id = 'visitor-counter';
+        counterDiv.innerHTML = `
+            <div class="counter-content">
+                <span class="counter-icon">👥</span>
+                <span class="counter-text">Visits: <span id="visit-count">0</span></span>
+            </div>
+        `;
+        document.body.appendChild(counterDiv);
+
+        // Create detailed stats (optional - can be hidden/shown)
+        const statsDiv = document.createElement('div');
+        statsDiv.id = 'visitor-stats';
+        statsDiv.innerHTML = `
+            <div class="stats-header">
+                <h3>📊 Visitor Statistics</h3>
+                <button id="stats-toggle">×</button>
+            </div>
+            <div class="stats-content">
+                <div class="stat-item">
+                    <span class="stat-label">Total Visits:</span>
+                    <span id="total-visits">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Unique Visitors:</span>
+                    <span id="unique-visitors">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Today's Visits:</span>
+                    <span id="today-visits">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Your Visits:</span>
+                    <span id="user-visits">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Last Visit:</span>
+                    <span id="last-visit">Never</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Session Duration:</span>
+                    <span id="session-time">0s</span>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(statsDiv);
+
+        // Add CSS styles
+        this.addStyles();
+    }
+
+    // Add CSS styles for the visitor tracker
+    addStyles() {
+        const style = document.createElement('style');
+        style.textContent = `
+            /* Visitor Counter Styles */
+            #visitor-counter {
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 12px 16px;
+                border-radius: 25px;
+                font-family: 'Arial', sans-serif;
+                font-size: 14px;
+                font-weight: 600;
+                z-index: 1000;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+                cursor: pointer;
+                transition: all 0.3s ease;
+                user-select: none;
+            }
+
+            #visitor-counter:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+                background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+            }
+
+            .counter-content {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .counter-icon {
+                font-size: 16px;
+                animation: pulse 2s infinite;
+            }
+
+            @keyframes pulse {
+                0% { transform: scale(1); }
+                50% { transform: scale(1.1); }
+                100% { transform: scale(1); }
+            }
+
+            /* Visitor Stats Panel */
+            #visitor-stats {
+                position: fixed;
+                bottom: 80px;
+                right: 20px;
+                background: white;
+                border-radius: 12px;
+                box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+                z-index: 999;
+                min-width: 280px;
+                max-width: 350px;
+                transform: translateX(400px);
+                opacity: 0;
+                transition: all 0.3s ease;
+                border: 1px solid #e1e5e9;
+            }
+
+            #visitor-stats.show {
+                transform: translateX(0);
+                opacity: 1;
+            }
+
+            .stats-header {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 15px 20px;
+                border-radius: 12px 12px 0 0;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .stats-header h3 {
+                margin: 0;
+                font-size: 16px;
+                font-weight: 600;
+            }
+
+            #stats-toggle {
+                background: none;
+                border: none;
+                color: white;
+                font-size: 20px;
+                cursor: pointer;
+                padding: 0;
+                width: 24px;
+                height: 24px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 50%;
+                transition: background 0.2s ease;
+            }
+
+            #stats-toggle:hover {
+                background: rgba(255,255,255,0.2);
+            }
+
+            .stats-content {
+                padding: 20px;
+            }
+
+            .stat-item {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 8px 0;
+                border-bottom: 1px solid #f0f0f0;
+                font-family: 'Arial', sans-serif;
+            }
+
+            .stat-item:last-child {
+                border-bottom: none;
+            }
+
+            .stat-label {
+                color: #666;
+                font-size: 14px;
+            }
+
+            .stat-item span:not(.stat-label) {
+                font-weight: 600;
+                color: #333;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+            }
+
+            /* Mobile Responsive */
+            @media (max-width: 768px) {
+                #visitor-counter {
+                    bottom: 15px;
+                    right: 15px;
+                    padding: 10px 14px;
+                    font-size: 13px;
+                }
+
+                #visitor-stats {
+                    bottom: 65px;
+                    right: 15px;
+                    left: 15px;
+                    min-width: auto;
+                    max-width: none;
+                    transform: translateY(400px);
+                }
+
+                #visitor-stats.show {
+                    transform: translateY(0);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    // Main visitor tracking function
+    trackVisitor() {
+        const now = new Date();
+        const today = now.toDateString();
+        const timestamp = now.getTime();
+
+        // Get existing data
+        let data = this.getStoredData();
+        let sessionData = this.getSessionData();
+
+        // Generate or get user ID
+        if (!data.userId) {
+            data.userId = this.generateUserId();
+        }
+
+        // Check if this is a new visit (more than 30 minutes since last visit)
+        const thirtyMinutes = 30 * 60 * 1000;
+        const isNewVisit = !data.lastVisit || (timestamp - data.lastVisit) > thirtyMinutes;
+
+        // Check if this is a new user
+        const isNewUser = !data.firstVisit;
+
+        if (isNewVisit) {
+            // Increment visit counters
+            data.totalVisits = (data.totalVisits || 0) + 1;
+            data.userVisits = (data.userVisits || 0) + 1;
+            data.lastVisit = timestamp;
+
+            // Set first visit if new user
+            if (isNewUser) {
+                data.firstVisit = timestamp;
+                data.uniqueVisitors = (data.uniqueVisitors || 0) + 1;
+            }
+
+            // Track daily visits
+            if (!data.dailyVisits) {
+                data.dailyVisits = {};
+            }
+            data.dailyVisits[today] = (data.dailyVisits[today] || 0) + 1;
+
+            // Track visitor info
+            this.trackVisitorInfo(data, timestamp);
+        }
+
+        // Update session data
+        sessionData.sessionStart = sessionData.sessionStart || timestamp;
+        sessionData.pageViews = (sessionData.pageViews || 0) + 1;
+
+        // Store updated data
+        this.storeData(data);
+        this.storeSessionData(sessionData);
+
+        // Update display
+        this.updateDisplay(data, sessionData);
+
+        // Start session timer
+        this.startSessionTimer(sessionData.sessionStart);
+
+        // Track page engagement
+        this.trackEngagement();
+    }
+
+    // Generate unique user ID
+    generateUserId() {
+        return 'user_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+    }
+
+    // Track additional visitor information
+    trackVisitorInfo(data, timestamp) {
+        // Track browser info
+        data.browserInfo = {
+            userAgent: navigator.userAgent,
+            language: navigator.language,
+            platform: navigator.platform,
+            cookieEnabled: navigator.cookieEnabled,
+            onLine: navigator.onLine
+        };
+
+        // Track page info
+        data.pageInfo = {
+            url: window.location.href,
+            referrer: document.referrer,
+            title: document.title
+        };
+
+        // Track screen info
+        data.screenInfo = {
+            width: screen.width,
+            height: screen.height,
+            colorDepth: screen.colorDepth
+        };
+
+        // Track visit times
+        if (!data.visitTimes) {
+            data.visitTimes = [];
+        }
+        data.visitTimes.push({
+            timestamp: timestamp,
+            date: new Date(timestamp).toLocaleString()
+        });
+
+        // Keep only last 10 visits
+        if (data.visitTimes.length > 10) {
+            data.visitTimes = data.visitTimes.slice(-10);
+        }
+    }
+
+    // Start session timer
+    startSessionTimer(sessionStart) {
+        setInterval(() => {
+            const sessionDuration = Math.floor((Date.now() - sessionStart) / 1000);
+            document.getElementById('session-time').textContent = this.formatTime(sessionDuration);
+        }, 1000);
+    }
+
+    // Track user engagement
+    trackEngagement() {
+        let scrollDepth = 0;
+        let maxScroll = 0;
+        let clickCount = 0;
+        let keystrokes = 0;
+
+        // Track scroll depth
+        window.addEventListener('scroll', () => {
+            const winHeight = window.innerHeight;
+            const docHeight = document.documentElement.scrollHeight;
+            const scrollTop = window.pageYOffset;
+            scrollDepth = Math.round((scrollTop / (docHeight - winHeight)) * 100);
+            maxScroll = Math.max(maxScroll, scrollDepth);
+        });
+
+        // Track clicks
+        document.addEventListener('click', () => {
+            clickCount++;
+        });
+
+        // Track keystrokes
+        document.addEventListener('keydown', () => {
+            keystrokes++;
+        });
+
+        // Store engagement data periodically
+        setInterval(() => {
+            const data = this.getStoredData();
+            data.engagement = {
+                maxScrollDepth: maxScroll,
+                clicks: clickCount,
+                keystrokes: keystrokes,
+                timeSpent: Math.floor((Date.now() - this.getSessionData().sessionStart) / 1000)
+            };
+            this.storeData(data);
+        }, 10000); // Every 10 seconds
+    }
+
+    // Setup event listeners
+    setupEventListeners() {
+        // Toggle stats panel
+        document.getElementById('visitor-counter').addEventListener('click', () => {
+            const statsPanel = document.getElementById('visitor-stats');
+            statsPanel.classList.toggle('show');
+        });
+
+        // Close stats panel
+        document.getElementById('stats-toggle').addEventListener('click', (e) => {
+            e.stopPropagation();
+            document.getElementById('visitor-stats').classList.remove('show');
+        });
+
+        // Close stats when clicking outside
+        document.addEventListener('click', (e) => {
+            const statsPanel = document.getElementById('visitor-stats');
+            const counter = document.getElementById('visitor-counter');
+            if (!statsPanel.contains(e.target) && !counter.contains(e.target)) {
+                statsPanel.classList.remove('show');
+            }
+        });
+
+        // Track page visibility
+        document.addEventListener('visibilitychange', () => {
+            const data = this.getStoredData();
+            if (document.visibilityState === 'hidden') {
+                data.lastActiveTime = Date.now();
+            } else {
+                data.returnTime = Date.now();
+            }
+            this.storeData(data);
+        });
+    }
+
+    // Update display with current data
+    updateDisplay(data, sessionData) {
+        const today = new Date().toDateString();
+        const todayVisits = data.dailyVisits ? (data.dailyVisits[today] || 0) : 0;
+
+        document.getElementById('visit-count').textContent = data.totalVisits || 0;
+        document.getElementById('total-visits').textContent = data.totalVisits || 0;
+        document.getElementById('unique-visitors').textContent = data.uniqueVisitors || 1;
+        document.getElementById('today-visits').textContent = todayVisits;
+        document.getElementById('user-visits').textContent = data.userVisits || 0;
+        
+        if (data.lastVisit) {
+            document.getElementById('last-visit').textContent = new Date(data.lastVisit).toLocaleDateString();
+        }
+    }
+
+    // Utility functions
+    formatTime(seconds) {
+        const hours = Math.floor(seconds / 3600);
+        const minutes = Math.floor((seconds % 3600) / 60);
+        const secs = seconds % 60;
+
+        if (hours > 0) {
+            return `${hours}h ${minutes}m ${secs}s`;
+        } else if (minutes > 0) {
+            return `${minutes}m ${secs}s`;
+        } else {
+            return `${secs}s`;
+        }
+    }
+
+    getStoredData() {
+        try {
+            return JSON.parse(localStorage.getItem(this.storageKey)) || {};
+        } catch (e) {
+            return {};
+        }
+    }
+
+    storeData(data) {
+        try {
+            localStorage.setItem(this.storageKey, JSON.stringify(data));
+        } catch (e) {
+            console.warn('Unable to store visitor data:', e);
+        }
+    }
+
+    getSessionData() {
+        try {
+            return JSON.parse(sessionStorage.getItem(this.sessionKey)) || {};
+        } catch (e) {
+            return {};
+        }
+    }
+
+    storeSessionData(data) {
+        try {
+            sessionStorage.setItem(this.sessionKey, JSON.stringify(data));
+        } catch (e) {
+            console.warn('Unable to store session data:', e);
+        }
+    }
+
+    // Public method to get analytics data
+    getAnalytics() {
+        return {
+            stored: this.getStoredData(),
+            session: this.getSessionData()
+        };
+    }
+
+    // Public method to reset all data
+    reset() {
+        localStorage.removeItem(this.storageKey);
+        sessionStorage.removeItem(this.sessionKey);
+        location.reload();
+    }
+}
+
+// Initialize the visitor tracker when page loads
+document.addEventListener('DOMContentLoaded', () => {
+    window.visitorTracker = new VisitorTracker();
+});
+
+// Optional: Add to window object for debugging
+window.getVisitorAnalytics = () => {
+    return window.visitorTracker ? window.visitorTracker.getAnalytics() : null;
+};
+
+window.resetVisitorData = () => {
+    if (window.visitorTracker && confirm('Are you sure you want to reset all visitor data?')) {
+        window.visitorTracker.reset();
+    }
+};
+        
         </script>
     </body>
 
